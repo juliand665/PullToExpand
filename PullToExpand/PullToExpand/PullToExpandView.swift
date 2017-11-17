@@ -46,8 +46,6 @@ import UIKit
 			let progress = (translation - lastTranslation) / heightDifference
 			
 			animationProgress += progress
-			//height = newHeight.softClamped(min: minHeight, max: maxHeight)
-			//darkeningView.alpha = progress * darkeningOpacity
 		case .ended:
 			let shouldCompact = 0.1 * velocity / heightDifference + animationProgress < 0.5
 			//print("0.1 * \(velocity) / \(heightDifference) + \(animationProgress) = \(0.1 * velocity / heightDifference + animationProgress) vs 0.5")
@@ -61,6 +59,7 @@ import UIKit
 		return maxHeight - minHeight
 	}
 	
+	/// 0 is fully compact; 1 is fully expanded
 	var animationProgress: CGFloat = 0 {
 		didSet {
 			height = minHeight + animationProgress.softClamped() * heightDifference
