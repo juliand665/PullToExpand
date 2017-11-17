@@ -19,13 +19,21 @@ class ViewController: UIViewController {
 	
 	@IBAction func dampingRatioChanged() {
 		pullableView.damping = CGFloat(dampingSlider.value)
-		dampingLabel.text = String(dampingSlider.value)
+		dampingLabel.text = formatter.string(from: dampingSlider.value as NSNumber)
 	}
 	
 	@IBAction func stiffnessChanged() {
 		pullableView.stiffness = CGFloat(stiffnessSlider.value)
-		stiffnessLabel.text = String(stiffnessSlider.value)
+		stiffnessLabel.text = formatter.string(from: stiffnessSlider.value as NSNumber)
 	}
+	
+	let formatter: NumberFormatter = {
+		let formatter = NumberFormatter()
+		formatter.minimumIntegerDigits = 1
+		formatter.maximumFractionDigits = 2
+		formatter.minimumFractionDigits = 2
+		return formatter
+	}()
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
