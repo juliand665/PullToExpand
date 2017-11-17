@@ -11,8 +11,12 @@ import UIKit
 @IBDesignable public class PullableView: UIView {
 	@IBInspectable public var minHeight: CGFloat = 64
 	@IBInspectable public var maxHeight: CGFloat = 512
+	/// opacity of the darkening (black) view that fades in as the pulable view is expanded
 	@IBInspectable public var darkeningOpacity: CGFloat = 0.4
-	@IBInspectable public var dampingRatio: CGFloat = 1
+	/// the lower this is, the more jelly-like the animation will be
+	@IBInspectable public var damping: CGFloat = 2.5
+	/// the higher this is, the faster the animation will be
+	@IBInspectable public var stiffness: CGFloat = 50
 	
 	@IBAction public func expand() {
 		updateBarSize(compact: false)
@@ -37,7 +41,6 @@ import UIKit
 			animator?.stopAnimation(true)
 			lastTranslation = 0
 			animationProgress = (height - minHeight) / heightDifference
-			startedCompact = isCompact
 		fallthrough // already got some translation and velocity here
 		case .changed:
 			defer {
@@ -47,11 +50,11 @@ import UIKit
 			
 			animationProgress += progress
 		case .ended:
-			let shouldCompact = 0.1 * velocity / heightDifference + animationProgress < 0.5
+			let compact = 0.1 * velocity / heightDifference + animationProgress < 0.5
 			//print("0.1 * \(velocity) / \(heightDifference) + \(animationProgress) = \(0.1 * velocity / heightDifference + animationProgress) vs 0.5")
-			updateBarSize(compact: shouldCompact, springVelocity: velocity)
+			updateBarSize(compact: compact, springVelocity: velocity)
 		case .cancelled, .failed:
-			updateBarSize(compact: startedCompact, springVelocity: velocity)
+			updateBarSize(compact: isCompact, springVelocity: velocity)
 		}
 	}
 	
@@ -67,12 +70,8 @@ import UIKit
 		}
 	}
 	
-	var isCompact: Bool {
-		return height <= minHeight + heightDifference / 2
-	}
-	
+	var isCompact = true
 	var lastTranslation: CGFloat = 0
-	var startedCompact = false
 	var darkeningView: UIView!
 	var animator: UIViewPropertyAnimator?
 	lazy var minConstraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0, constant: minHeight)
@@ -123,11 +122,8 @@ import UIKit
 	}
 	
 	func timingParameters(initialVelocity: CGFloat = 0) -> UISpringTimingParameters {
-		let mass: CGFloat = 1
-		let stiffness: CGFloat = 50
-		let damping = dampingRatio * 2 * sqrt(mass * stiffness)
 		let velocity = CGVector(dx: initialVelocity, dy: 0) // only magnitude is considered for 1D animations
-		return UISpringTimingParameters(mass: mass, stiffness: stiffness, damping: damping, initialVelocity: velocity)
+		return UISpringTimingParameters(mass: 0.05, stiffness: stiffness, damping: damping, initialVelocity: velocity)
 	}
 	
 	/// - Parameter compact: whether to resize to a compact or expanded view
@@ -145,6 +141,9 @@ import UIKit
 		animator!.addAnimations {
 			self.superview!.layoutIfNeeded()
 			self.darkeningView.alpha = compact ? 0 : self.darkeningOpacity
+		}
+		animator!.addCompletion { _ in
+			self.isCompact = compact
 		}
 		animator!.startAnimation()
 	}
