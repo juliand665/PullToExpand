@@ -37,7 +37,6 @@ import UIKit
 			animator?.stopAnimation(true)
 			lastTranslation = 0
 			animationProgress = (height - minHeight) / heightDifference
-			print("Starting height: \(height)")
 			startedCompact = isCompact
 		fallthrough // already got some translation and velocity here
 		case .changed:
@@ -128,7 +127,7 @@ import UIKit
 		let mass: CGFloat = 1
 		let stiffness: CGFloat = 50
 		let damping = dampingRatio * 2 * sqrt(mass * stiffness)
-		let velocity = CGVector(dx: initialVelocity, dy: 0) // only magnitude considered for 1D animations
+		let velocity = CGVector(dx: initialVelocity, dy: 0) // only magnitude is considered for 1D animations
 		return UISpringTimingParameters(mass: mass, stiffness: stiffness, damping: damping, initialVelocity: velocity)
 	}
 	
@@ -140,17 +139,13 @@ import UIKit
 		let parameters = timingParameters(initialVelocity: velocity / (targetHeight - frame.height)) // have to normalize to animation distance
 		animator = UIViewPropertyAnimator(duration: 10, timingParameters: parameters) // duration will be ignored because of advanced spring timing parameters
 		
-		superview!.layoutIfNeeded()
 		maxConstraint.isActive = false // to avoid unsatisfiable constraint warnings
 		minConstraint.isActive = compact
 		maxConstraint.isActive = !compact
+		superview!.setNeedsLayout()
 		animator!.addAnimations {
-			//self.superview!.layoutIfNeeded()
-			self.darkeningView.alpha = compact ? 0 : self.darkeningOpacity
-		}
-		animator?.addCompletion { (position) in
-			print("animator finished at", position == .current ? "current" : position == .end ? "end" : "start")
 			self.superview!.layoutIfNeeded()
+			self.darkeningView.alpha = compact ? 0 : self.darkeningOpacity
 		}
 		animator!.startAnimation()
 	}
