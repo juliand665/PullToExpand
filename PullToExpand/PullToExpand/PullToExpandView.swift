@@ -11,6 +11,11 @@ import UIKit
 @IBDesignable public class PullableView: UIView {
 	@IBInspectable public var minHeight: CGFloat = 64
 	@IBInspectable public var maxHeight: CGFloat = 512
+	@IBInspectable public var previewExpanded: Bool = false { // need to define type explicitly for IB
+		didSet {
+			// TODO
+		}
+	}
 	/// opacity of the darkening (black) view that fades in as the pulable view is expanded
 	@IBInspectable public var darkeningOpacity: CGFloat = 0.4
 	/// the lower this is, the more jelly-like the animation will be
@@ -31,8 +36,8 @@ import UIKit
 	}
 	
 	@objc func viewPulled(_ recognizer: UIPanGestureRecognizer) {
-		let velocity = recognizer.velocity(in: superview).y
 		let translation = recognizer.translation(in: superview).y
+		let velocity = recognizer.velocity(in: superview).y
 		
 		switch recognizer.state {
 		case .possible:
@@ -43,15 +48,12 @@ import UIKit
 			animationProgress = (height - minHeight) / heightDifference
 		fallthrough // already got some translation and velocity here
 		case .changed:
-			defer {
-				lastTranslation = translation
-			}
 			let progress = (translation - lastTranslation) / heightDifference
+			lastTranslation = translation
 			
 			animationProgress += progress
 		case .ended:
 			let compact = 0.1 * velocity / heightDifference + animationProgress < 0.5
-			//print("0.1 * \(velocity) / \(heightDifference) + \(animationProgress) = \(0.1 * velocity / heightDifference + animationProgress) vs 0.5")
 			updateBarSize(compact: compact, springVelocity: velocity)
 		case .cancelled, .failed:
 			updateBarSize(compact: isCompact, springVelocity: velocity)
@@ -74,8 +76,8 @@ import UIKit
 	var lastTranslation: CGFloat = 0
 	var darkeningView: UIView!
 	var animator: UIViewPropertyAnimator?
-	lazy var minConstraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0, constant: minHeight)
-	lazy var maxConstraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0, constant: maxHeight)
+	lazy var minConstraint = NSLayoutConstraint(self, .height, .equal, constant: minHeight)
+	lazy var maxConstraint = NSLayoutConstraint(self, .height, .equal, constant: maxHeight)
 	
 	/**
 	Programmatically instantiate the view in its compact form
@@ -153,5 +155,17 @@ private extension UIView {
 	var height: CGFloat {
 		get { return frame.size.height            }
 		set {        frame.size.height = newValue }
+	}
+}
+
+extension NSLayoutConstraint {
+	convenience init(_ view1: Any,
+					 _ attribute1: NSLayoutAttribute,
+					 _ relation: NSLayoutRelation,
+					 to view2: Any? = nil,
+					 _ attribute2: NSLayoutAttribute = .notAnAttribute,
+					 multiplier: CGFloat = 0,
+					 constant: CGFloat = 0) {
+		self.init(item: view1, attribute: attribute1, relatedBy: relation, toItem: view2, attribute: attribute2, multiplier: multiplier, constant: constant)
 	}
 }
