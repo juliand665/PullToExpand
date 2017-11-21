@@ -9,13 +9,17 @@
 import UIKit
 
 @IBDesignable public class PullableView: UIView {
-	@IBInspectable public var minHeight: CGFloat = 64
-	@IBInspectable public var maxHeight: CGFloat = 512
-	@IBInspectable public var previewExpanded: Bool = false { // need to define type explicitly for IB
+	@IBInspectable public var minHeight: CGFloat = 64 {
 		didSet {
-			// TODO
+			minConstraint.constant = minHeight
 		}
 	}
+	@IBInspectable public var maxHeight: CGFloat = 256 {
+		didSet {
+			maxConstraint.constant = maxHeight
+		}
+	}
+	@IBInspectable public var previewExpanded: Bool = false // need to define type explicitly for IB
 	/// opacity of the darkening (black) view that fades in as the pulable view is expanded
 	@IBInspectable public var darkeningOpacity: CGFloat = 0.4
 	/// the lower this is, the more jelly-like the animation will be
@@ -101,11 +105,11 @@ import UIKit
 	/// Please use `init(frame:expandedHeight:)` to programmatically instantiate this view.
 	/// 
 	/// This initializer is necessary for storyboard-based instantiation
-	required public init?(coder decoder: NSCoder) {
+	public required init?(coder decoder: NSCoder) {
 		super.init(coder: decoder)
 	}
 	
-	override public func didMoveToSuperview() {
+	public override func didMoveToSuperview() {
 		super.didMoveToSuperview()
 		
 		addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(viewPulled)))
@@ -123,6 +127,12 @@ import UIKit
 		darkeningView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(contract)))
 	}
 	
+	public override func prepareForInterfaceBuilder() {
+		super.prepareForInterfaceBuilder()
+		minConstraint.isActive = !previewExpanded
+		maxConstraint.isActive = previewExpanded
+	}
+	
 	func timingParameters(initialVelocity: CGFloat = 0) -> UISpringTimingParameters {
 		let velocity = CGVector(dx: initialVelocity, dy: 0) // only magnitude is considered for 1D animations
 		return UISpringTimingParameters(mass: 0.05, stiffness: stiffness, damping: damping, initialVelocity: velocity)
@@ -136,7 +146,7 @@ import UIKit
 		let parameters = timingParameters(initialVelocity: velocity / (targetHeight - frame.height)) // have to normalize to animation distance
 		animator = UIViewPropertyAnimator(duration: 10, timingParameters: parameters) // duration will be ignored because of advanced spring timing parameters
 		
-		maxConstraint.isActive = false // to avoid unsatisfiable constraint warnings
+		maxConstraint.isActive = false // to avoid unsatisfiable constraint log messages
 		minConstraint.isActive = compact
 		maxConstraint.isActive = !compact
 		superview!.setNeedsLayout()
