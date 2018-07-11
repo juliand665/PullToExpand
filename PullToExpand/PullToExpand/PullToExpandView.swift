@@ -11,19 +11,26 @@ import UIKit
 @IBDesignable public class PullableView: UIView {
 	@IBInspectable public var minHeight: CGFloat = 64 {
 		didSet {
-			minConstraint.constant = minHeight
+			if heightConstraint.constant == oldValue {
+				heightConstraint.constant = minHeight
+				superview?.setNeedsLayout()
+			}
 		}
 	}
 	@IBInspectable public var maxHeight: CGFloat = 256 {
 		didSet {
-			maxConstraint.constant = maxHeight
+			if heightConstraint.constant == oldValue {
+				heightConstraint.constant = maxHeight
+				superview?.setNeedsLayout()
+			}
 		}
 	}
 	@IBInspectable public var previewExpanded: Bool = false // need to define type explicitly for IB
+	@IBInspectable public var expandsDownward: Bool = true
 	/// opacity of the darkening (black) view that fades in as the pulable view is expanded
 	@IBInspectable public var darkeningOpacity: CGFloat = 0.4
 	/// the lower this is, the more jelly-like the animation will be
-	@IBInspectable public var damping: CGFloat = 2.5
+	@IBInspectable public var damping: CGFloat = 2
 	/// the higher this is, the faster the animation will be
 	@IBInspectable public var stiffness: CGFloat = 50
 	
@@ -39,9 +46,10 @@ import UIKit
 		updateBarSize(compact: !isCompact)
 	}
 	
-	@objc func viewPulled(_ recognizer: UIPanGestureRecognizer) {
-		let translation = recognizer.translation(in: superview).y
-		let velocity = recognizer.velocity(in: superview).y
+	@objc public func viewPulled(_ recognizer: UIPanGestureRecognizer) {
+		let multiplier: CGFloat = expandsDownward ? 1 : -1
+		let translation = multiplier * recognizer.translation(in: superview).y
+		let velocity = multiplier * recognizer.velocity(in: superview).y
 		
 		switch recognizer.state {
 		case .possible:
@@ -71,7 +79,8 @@ import UIKit
 	/// 0 is fully compact; 1 is fully expanded
 	var animationProgress: CGFloat = 0 {
 		didSet {
-			height = minHeight + animationProgress.softClamped() * heightDifference
+			heightConstraint.constant = minHeight + animationProgress.softClamped() * heightDifference
+			superview!.setNeedsLayout()
 			darkeningView.alpha = animationProgress.clamped() * darkeningOpacity
 		}
 	}
@@ -80,8 +89,7 @@ import UIKit
 	var lastTranslation: CGFloat = 0
 	var darkeningView: UIView!
 	var animator: UIViewPropertyAnimator?
-	lazy var minConstraint = NSLayoutConstraint(self, .height, .equal, constant: minHeight)
-	lazy var maxConstraint = NSLayoutConstraint(self, .height, .equal, constant: maxHeight)
+	lazy var heightConstraint = heightAnchor.constraint(equalToConstant: minHeight)
 	
 	/**
 	Programmatically instantiate the view in its compact form
@@ -115,8 +123,7 @@ import UIKit
 		addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(viewPulled)))
 		addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(expand)))
 		
-		minConstraint.isActive = true
-		maxConstraint.isActive = false
+		heightConstraint.isActive = true
 		
 		darkeningView = UIView(frame: CGRect(origin: .zero, size: superview?.frame.size ?? .zero))
 		darkeningView.backgroundColor = .black
@@ -129,12 +136,12 @@ import UIKit
 	
 	public override func prepareForInterfaceBuilder() {
 		super.prepareForInterfaceBuilder()
-		minConstraint.isActive = !previewExpanded
-		maxConstraint.isActive = previewExpanded
+		heightConstraint.constant = previewExpanded ? maxHeight : minHeight
 	}
 	
 	func timingParameters(initialVelocity: CGFloat = 0) -> UISpringTimingParameters {
-		let velocity = CGVector(dx: initialVelocity, dy: 0) // only magnitude is considered for 1D animations
+		let component = initialVelocity / sqrt(2)
+		let velocity = CGVector(dx: component, dy: component) // the magnitude is what matters in the end, but the top end wiggles if dx ≠ dy
 		return UISpringTimingParameters(mass: 0.05, stiffness: stiffness, damping: damping, initialVelocity: velocity)
 	}
 	
@@ -146,10 +153,9 @@ import UIKit
 		let parameters = timingParameters(initialVelocity: velocity / (targetHeight - frame.height)) // have to normalize to animation distance
 		animator = UIViewPropertyAnimator(duration: 10, timingParameters: parameters) // duration will be ignored because of advanced spring timing parameters
 		
-		maxConstraint.isActive = false // to avoid unsatisfiable constraint log messages
-		minConstraint.isActive = compact
-		maxConstraint.isActive = !compact
+		heightConstraint.constant = compact ? minHeight : maxHeight
 		superview!.setNeedsLayout()
+		
 		animator!.addAnimations {
 			self.superview!.layoutIfNeeded()
 			self.darkeningView.alpha = compact ? 0 : self.darkeningOpacity
@@ -165,17 +171,5 @@ private extension UIView {
 	var height: CGFloat {
 		get { return frame.size.height            }
 		set {        frame.size.height = newValue }
-	}
-}
-
-extension NSLayoutConstraint {
-	convenience init(_ view1: Any,
-					 _ attribute1: NSLayoutAttribute,
-					 _ relation: NSLayoutRelation,
-					 to view2: Any? = nil,
-					 _ attribute2: NSLayoutAttribute = .notAnAttribute,
-					 multiplier: CGFloat = 0,
-					 constant: CGFloat = 0) {
-		self.init(item: view1, attribute: attribute1, relatedBy: relation, toItem: view2, attribute: attribute2, multiplier: multiplier, constant: constant)
 	}
 }

@@ -19,7 +19,7 @@ extension CGFloat {
 		let (min, max) = bounds
 		let space = (max - min) * scale
 		func soften(offset: CGFloat) -> CGFloat {
-			return space - space * space / (space + offset) // goes from 0 to space, with a gradient of 1 at 0 (and 0 at ∞)
+			return space * offset / (space + offset) // goes from 0 to space, with a gradient of 1 at 0 (and 0 at ∞)
 		}
 		
 		if self < min {
