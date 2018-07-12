@@ -89,7 +89,10 @@ import UIKit
 	var lastTranslation: CGFloat = 0
 	var darkeningView: UIView!
 	var animator: UIViewPropertyAnimator?
+	
 	lazy var heightConstraint = heightAnchor.constraint(equalToConstant: minHeight)
+	public lazy var panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(viewPulled))
+	public lazy var tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(expand))
 	
 	/**
 	Programmatically instantiate the view in its compact form
@@ -120,8 +123,8 @@ import UIKit
 	public override func didMoveToSuperview() {
 		super.didMoveToSuperview()
 		
-		addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(viewPulled)))
-		addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(expand)))
+		addGestureRecognizer(panRecognizer)
+		addGestureRecognizer(tapRecognizer)
 		
 		heightConstraint.isActive = true
 		
