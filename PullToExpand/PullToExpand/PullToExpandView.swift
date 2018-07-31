@@ -72,6 +72,10 @@ import UIKit
 		}
 	}
 	
+	public var isCompact = true
+	public lazy var panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(viewPulled))
+	public lazy var tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(expand))
+	
 	var heightDifference: CGFloat {
 		return maxHeight - minHeight
 	}
@@ -85,14 +89,11 @@ import UIKit
 		}
 	}
 	
-	var isCompact = true
 	var lastTranslation: CGFloat = 0
 	var darkeningView: UIView!
 	var animator: UIViewPropertyAnimator?
 	
 	lazy var heightConstraint = heightAnchor.constraint(equalToConstant: minHeight)
-	public lazy var panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(viewPulled))
-	public lazy var tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(expand))
 	
 	/**
 	Programmatically instantiate the view in its compact form
@@ -157,7 +158,6 @@ import UIKit
 		animator = UIViewPropertyAnimator(duration: 10, timingParameters: parameters) // duration will be ignored because of advanced spring timing parameters
 		
 		heightConstraint.constant = compact ? minHeight : maxHeight
-		superview!.setNeedsLayout()
 		
 		animator!.addAnimations {
 			self.superview!.layoutIfNeeded()
