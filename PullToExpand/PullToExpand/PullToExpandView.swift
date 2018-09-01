@@ -160,7 +160,7 @@ import UIKit
 		heightConstraint.constant = compact ? minHeight : maxHeight
 		
 		animator!.addAnimations {
-			self.superview!.layoutIfNeeded()
+			self.superview?.layoutIfNeeded()
 			self.darkeningView.alpha = compact ? 0 : self.darkeningOpacity
 		}
 		animator!.addCompletion { _ in
