@@ -1,10 +1,4 @@
-//
-//  PullToExpandView.swift
-//  PullToExpand
-//
-//  Created by Julian Dunskus on 13.09.17.
-//  Copyright © 2017 Julian Dunskus. All rights reserved.
-//
+// Created by Julian Dunskus
 
 import UIKit
 
