@@ -56,13 +56,14 @@ import UIKit
 		case .changed:
 			let progress = (translation - lastTranslation) / heightDifference
 			lastTranslation = translation
-			
 			animationProgress += progress
 		case .ended:
 			let compact = 0.1 * velocity / heightDifference + animationProgress < 0.5
 			updateBarSize(compact: compact, springVelocity: velocity)
 		case .cancelled, .failed:
 			updateBarSize(compact: isCompact, springVelocity: velocity)
+		@unknown default:
+			print("ignoring unknown recognizer state: \(recognizer.state)")
 		}
 	}
 	
