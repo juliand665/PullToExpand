@@ -1,10 +1,4 @@
-//
-//  Helpers.swift
-//  PullToExpand
-//
-//  Created by Julian Dunskus on 03.10.17.
-//  Copyright © 2017 Julian Dunskus. All rights reserved.
-//
+// Created by Julian Dunskus
 
 import CoreGraphics
 
