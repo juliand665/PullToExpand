@@ -1,13 +1,11 @@
-
 <p align="center">
-	<img width=192px src="Images/logo.png" /><br><br>
-	<a href="https://swift.org">
-		<img alt="Swift 5.0" src="https://img.shields.io/badge/swift-5.0-orange.svg" />
+	<img width=192px src="GitHub/logo.png" /><br><br>
+	<a href="https://swift.org/package-manager/">
+		<img alt="Swift Package Manager compatible" src="https://img.shields.io/badge/swift_package_manager-compatible-brightgreen.svg" />
 	</a>
 	<a href="./LICENSE">
 		<img alt="MIT licensed" src="https://img.shields.io/badge/license-MIT-blue.svg" />
 	</a>
-	<img alt="Carthage compatible" src="https://img.shields.io/badge/carthage-compatible-brightgreen.svg" />
 </p>
 
 # PullToExpand
@@ -30,7 +28,7 @@ This is just one of infinitely many ways to configure it, of course.
 		<td>expanded</td>
 	</tr>
 	<tr>
-		<td><img src="Images/compact.png" alt="Pull-down view in compact (default) mode" /></td>
-		<td><img src="Images/expanded.png" alt="Pull-down view in expanded mode" /></td>
+		<td><img src="GitHub/compact.png" alt="Pull-down view in compact (default) mode" /></td>
+		<td><img src="GitHub/expanded.png" alt="Pull-down view in expanded mode" /></td>
 	</tr>
 </table>
