@@ -1,5 +1,6 @@
 import UIKit
 
+@available(iOS 10.0, *)
 @IBDesignable public class PullableView: UIView {
 	@IBInspectable public var minHeight: CGFloat = 64 {
 		didSet {
@@ -9,6 +10,7 @@ import UIKit
 			}
 		}
 	}
+	
 	@IBInspectable public var maxHeight: CGFloat = 256 {
 		didSet {
 			if heightConstraint.constant == oldValue {
@@ -17,6 +19,7 @@ import UIKit
 			}
 		}
 	}
+	
 	@IBInspectable public var previewExpanded: Bool = false // need to define type explicitly for IB
 	@IBInspectable public var expandsDownward: Bool = true
 	/// opacity of the darkening (black) view that fades in as the pulable view is expanded
