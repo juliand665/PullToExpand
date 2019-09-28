@@ -1,5 +1,3 @@
-// Created by Julian Dunskus
-
 import UIKit
 import PullToExpand
 
@@ -28,14 +26,4 @@ class ViewController: UIViewController {
 		formatter.minimumFractionDigits = 2
 		return formatter
 	}()
-	
-	override func viewDidLoad() {
-		super.viewDidLoad()
-		// Do any additional setup after loading the view, typically from a nib.
-	}
-
-	override func didReceiveMemoryWarning() {
-		super.didReceiveMemoryWarning()
-		// Dispose of any resources that can be recreated.
-	}
 }
