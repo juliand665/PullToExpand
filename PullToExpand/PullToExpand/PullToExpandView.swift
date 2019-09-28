@@ -1,5 +1,3 @@
-// Created by Julian Dunskus
-
 import UIKit
 
 @IBDesignable public class PullableView: UIView {

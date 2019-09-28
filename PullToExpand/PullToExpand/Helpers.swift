@@ -1,5 +1,3 @@
-// Created by Julian Dunskus
-
 import CoreGraphics
 
 extension CGFloat {
