@@ -1,6 +1,6 @@
 import UIKit
 
-@available(iOS 10.0, *)
+@available(iOS 10.0, tvOS 10.0, *)
 @IBDesignable public class PullableView: UIView {
 	@IBInspectable public var minHeight: CGFloat = 64 {
 		didSet {
